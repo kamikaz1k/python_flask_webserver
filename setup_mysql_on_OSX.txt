@@ -1,0 +1,15 @@
+download MySQL from http://dev.mysql.com/downloads/ and get the community server
+
+double click install, next, next, next
+
+when done, copy the temp root password from the popup for reset process later
+
+add /usr/local/mysql/bin/ so you can run "mysql" from anywhere
+
+reset password since temp password must be changed http://dev.mysql.com/doc/refman/5.7/en/resetting-permissions.html
+
+run mysql from console
+
+use command: ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass'; to set new password
+
+should be ready to use now
