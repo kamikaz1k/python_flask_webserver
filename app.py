@@ -78,5 +78,9 @@ def signUp():
     else:
         return json.dumps({'html':'<span>Enter the required fields</span>'})
 
+@app.route('/showSignin')
+def showSignin():
+    return render_template('signin.html')
+
 if __name__ == "__main__":
 	app.run()
