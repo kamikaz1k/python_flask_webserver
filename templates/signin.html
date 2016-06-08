@@ -8,7 +8,7 @@
  
     <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
     <link href="../static/css/signup.css" rel="stylesheet">
-    <script src="../static/js/jquery-1.11.2.js"></script>
+    <script type="text/javascript" src="../static/js/jquery-1.12.4.min.js"></script>
     
   </head>
  
@@ -29,13 +29,15 @@
       <div class="jumbotron">
         <h1>Bucket List App</h1>
         <form class="form-signin" action="/validateLogin" method="post">
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" name="inputEmail" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" name="inputPassword" id="inputPassword" class="form-control" placeholder="Password" required>
-         
-        <button id="btnSignIn" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      </form>
+          
+          <label for="inputEmail" class="sr-only">Email address</label>
+          <input type="email" name="inputEmail" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+          
+          <label for="inputPassword" class="sr-only">Password</label>
+          <input type="password" name="inputPassword" id="inputPassword" class="form-control" placeholder="Password" required>
+           
+          <button id="btnSignIn" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        </form>
       </div>
  
        
