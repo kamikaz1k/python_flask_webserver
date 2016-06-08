@@ -1,24 +1,26 @@
-from flask import Flask, render_template, json, request, redirect
+from flask import Flask, render_template, json, request, redirect, session
 from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
 
 # from pprint import pprint
 
+# App Configurations
 app = Flask(__name__)
-
-mysql = MySQL()
 
 # Load config file for DB user info
 with open('config.json') as data_file: 
     config = json.load(data_file)
 
-# print config
+# Set secret key to use the session module
+app.secret_key = config["secret_key"]
 
 # MySQL configurations
 app.config['MYSQL_DATABASE_USER'] = config["username"]
 app.config['MYSQL_DATABASE_PASSWORD'] = config["password"]
 app.config['MYSQL_DATABASE_DB'] = 'BucketList'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
+mysql = MySQL()
 mysql.init_app(app)
 
 # Routing Definitions
@@ -51,8 +53,9 @@ def signUp():
 
             # Retrieve DB Cursor
             cursor = conn.cursor()
-            cursor.callproc('sp_createUser', (_name, _email, _hashed_password))
 
+            # Make query
+            cursor.callproc('sp_createUser', (_name, _email, _hashed_password))
             data = cursor.fetchall()
 
              
@@ -82,7 +85,7 @@ def signUp():
 def showSignIn():
     return render_template('signin.html')
 
-@app.route('/validateLogin',methods=['POST'])
+@app.route('/validateLogin', methods=['POST'])
 def validateLogin():
 
     _username = request.form['inputEmail']
@@ -101,13 +104,11 @@ def validateLogin():
             cursor.callproc('sp_validateLogin',(_username,))
             data = cursor.fetchall()
 
-            # print data
-
             # Check there was data returned, otherwise return error
             if len(data) > 0:
                 # Check the hash against the entered value
                 if check_password_hash(str(data[0][3]),_password):
-                    # session['user'] = data[0][0]
+                    session['user'] = data[0][0]
                     return redirect('/userHome')
                 else:
                     return render_template('error.html', error = 'Wrong Password.')
@@ -115,7 +116,7 @@ def validateLogin():
                 return render_template('error.html', error = 'Wrong Email address.')
      
         except Exception as e:
-            return render_template('error.html',error = str(e))
+            return render_template('error.html', error = str(e))
 
         # Finally close cursor & connection so that next 
         # transaction can take place separately
@@ -129,7 +130,17 @@ def validateLogin():
     
 @app.route('/userHome')
 def showUserHome():
-    return render_template('userHome.html')
+    print "Session Info: ", session.get('user')
+    # return render_template('userHome.html')
+    if session.get('user'):
+        return render_template('userHome.html')
+    else:
+        return render_template('error.html', error = 'Unauthorized Access')
+
+@app.route('/logOut')
+def logOut():
+    session.pop('user', None)
+    return redirect('/')
 
 if __name__ == "__main__":
 	app.run()
