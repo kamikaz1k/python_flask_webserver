@@ -1,4 +1,4 @@
-from flask import Flask, render_template, json, request
+from flask import Flask, render_template, json, request, redirect
 from flask.ext.mysql import MySQL
 from werkzeug import generate_password_hash, check_password_hash
 
@@ -78,9 +78,58 @@ def signUp():
     else:
         return json.dumps({'html':'<span>Enter the required fields</span>'})
 
-@app.route('/showSignin')
-def showSignin():
+@app.route('/showSignIn')
+def showSignIn():
     return render_template('signin.html')
+
+@app.route('/validateLogin',methods=['POST'])
+def validateLogin():
+
+    _username = request.form['inputEmail']
+    _password = request.form['inputPassword']
+
+    if _username and _password:
+        
+        try:
+            # Connect to DB
+            conn = mysql.connect()
+
+            # Retrieve DB Cursor
+            cursor = conn.cursor()
+
+            # Make query
+            cursor.callproc('sp_validateLogin',(_username,))
+            data = cursor.fetchall()
+
+            # print data
+
+            # Check there was data returned, otherwise return error
+            if len(data) > 0:
+                # Check the hash against the entered value
+                if check_password_hash(str(data[0][3]),_password):
+                    # session['user'] = data[0][0]
+                    return redirect('/userHome')
+                else:
+                    return render_template('error.html', error = 'Wrong Password.')
+            else:
+                return render_template('error.html', error = 'Wrong Email address.')
+     
+        except Exception as e:
+            return render_template('error.html',error = str(e))
+
+        # Finally close cursor & connection so that next 
+        # transaction can take place separately
+        finally:
+            cursor.close()
+            conn.close()
+
+    # IF the signup form fields were not populated
+    else:
+        return json.dumps({'html':'<span>Enter the required fields</span>'})
+    
+@app.route('/userHome')
+def showUserHome():
+    return render_template('userHome.html')
 
 if __name__ == "__main__":
 	app.run()
